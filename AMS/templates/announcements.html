@@ -195,8 +195,12 @@ text-align:center;
 
 <h1><u><b>NOTICES</b></u></h1>
 <br>
-1.Yesterday is sunday <br>
-2.lorem ipsum<br>
+{% for ob in objs %}
+👉{{ob.Notice}} <br>
+{% endfor %}
+
+
+
 
 
 

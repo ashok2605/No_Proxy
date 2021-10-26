@@ -254,6 +254,15 @@
   font-weight: 500;
   margin: 18px
 }
+.sidebar{
+
+    
+  overflow-y:scroll;
+
+}
+.example::-webkit-scrollbar {
+  display: none;
+}
 @media (max-width: 420px) {
   .sidebar li .tooltip{
     display: none;
@@ -264,59 +273,109 @@
    </style>
    
    </head>
+   {% if user.is_authenticated %}
 <body>
-  <div class="sidebar">
+  <div class="sidebar example">
     <div class="logo-details">
       <i class='bx bxl-c-plus-plus icon'></i>
-        <div class="logo_name">Student</div>
+        <div class="logo_name">Hi,{{user.username}}</div>
         <i class='bx bx-menu' id="btn" ></i>
     </div>
     <ul class="nav-list">
       
       <li>
-        <a href="#">
+        <a href="/adminlogin/admin/addnotice">
           <i class='bx bx-grid-alt'></i>
-          <span class="links_name">AttendanceReport</span>
+          <span class="links_name">ADD NOTICE</span>
         </a>
-         <span class="tooltip">AttendanceReport</span>
+         <span class="tooltip">ADD NOTICE</span>
       </li>
       <li>
-       <a href="#">
+       <a href="/adminlogin/admin/deletenotice">
          <i class='bx bx-user' ></i>
-         <span class="links_name">UpdateInfo</span>
+         <span class="links_name">DELETE NOTICES</span>
        </a>
-       <span class="tooltip">UpdateInfo</span>
+       <span class="tooltip">DELETE NOTICES</span>
      </li>
      <li>
-       <a href="#">
+      <a href="/adminlogin/admin/removestudent">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">REMOVE STUDENT</span>
+      </a>
+      <span class="tooltip">REMOVE STUDENT</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/removeprofessor">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">REMOVE PROFESSOR</span>
+      </a>
+      <span class="tooltip">REMOVE PROFESSOR</span>
+    </li>
+     <li>
+       <a href="/adminlogin/admin/addcourse">
          <i class='bx bx-chat' ></i>
-         <span class="links_name">RaiseQuery</span>
+         <span class="links_name">ADDCOURSE</span>
        </a>
-       <span class="tooltip">RaiseQuery</span>
+       <span class="tooltip">ADDCOURSE</span>
      </li>
      <li>
-       <a href="#">
+       <a href="/adminlogin/admin/addstudent">
          <i class='bx bx-pie-chart-alt-2' ></i>
-         <span class="links_name">TimeTable</span>
+         <span class="links_name">ADDSTUDENT</span>
        </a>
-       <span class="tooltip">TimeTable</span>
+       <span class="tooltip">ADDSTUDENT</span>
      </li>
      <li>
-       <a href="#">
+       <a href="/adminlogin/admin/addprofessor">
          <i class='bx bx-folder' ></i>
-         <span class="links_name">MarkAttendance</span>
+         <span class="links_name">ADDPROFESSOR</span>
        </a>
-       <span class="tooltip">MarkAttendance</span>
+       <span class="tooltip">ADDPROFESSOR</span>
      </li>
+     <li>
+      <a href="/adminlogin/admin/initialupdatestudentinfo">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">UPDATE STUDENTINFO</span>
+      </a>
+      <span class="tooltip">UPDATE STUDENTINFO</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/initialupdateprofessorinfo">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">UPDATE PROFESSORINFO</span>
+      </a>
+      <span class="tooltip">UPDATE PROFESSORINFO</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/reschedulecourse">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">RESCHEDULE COURSE</span>
+      </a>
+      <span class="tooltip">RESCHEDULE COURSE</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/managequeries">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">MANAGE QUERIES</span>
+      </a>
+      <span class="tooltip">MANAGE QUERIES</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-user' ></i>
+        <span class="links_name"></span>
+      </a>
+      <span class="tooltip"></span>
+    </li>
      
      <li class="profile">
          <div class="profile-details">
            
            <div class="name_job">
-             <div class="name"><a href="#">Logout</a></div>
+             <div class="name"><a href="/adminlogin/logout"><b>Logout</b></a></div>
              
          </div>
-         <i class='bx bx-log-out' id="log_out" ></i>
+         <a href="/adminlogin/logout"> <i class='bx bx-log-out' id="log_out" ></i> </a>
      </li>
     </ul>
   </div>
@@ -347,5 +406,15 @@
    }
   }
   </script>
+  {% else %}
+  U are not authenticated please go to home page:<br>
+  <a href="/">home</a>
+  {% endif %}
+  <script>
+    {% for message in messages %}
+    window.alert("{{message}}");
+    {% endfor %}
+  </script>
+  
 </body>
 </html>

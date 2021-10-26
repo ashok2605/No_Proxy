@@ -1,0 +1,25 @@
+{% extends 'staffproj.html' %}
+
+{% block content %}
+<form method="POST">
+{% csrf_token %}
+<label for="cars">Make a query To:</label>
+
+<select name="to_who" id="cars">
+    <option value="ADMIN">ADMIN</option>
+    
+</select>
+<br><br>
+{{ form.question.errors }}
+<label for="{{ form.question.id_for_label }}" >Query:</label><br><br>
+{{ form.question }}<br><br>
+
+
+<input type="submit" value="Make A Query">
+
+
+</form>
+
+
+
+{% endblock %}

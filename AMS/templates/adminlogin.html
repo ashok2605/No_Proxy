@@ -318,7 +318,8 @@ text-align:center;
   </div>
 </div>
 <hr class="c">
-<div class="admin"><form action="#" method="POST">
+<div class="admin"><form method="POST">
+  {% csrf_token %}
 <h1><u>Admin Login</u></h1><br>
 <label>Username : </label>
 
@@ -369,6 +370,10 @@ window.onclick = function(event) {
   }
 }
 </script>
-
+<script>
+  {% for message in messages %}
+  window.alert("{{message}}");
+  {% endfor %}
+</script>
 </body>
 </html>

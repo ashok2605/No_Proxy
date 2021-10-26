@@ -219,6 +219,10 @@ window.onclick = function(event) {
   }
 }
 </script>
-
+<script>
+  {% for message in messages %}
+  window.alert("{{message}}");
+  {% endfor %}
+</script>
 </body>
 </html>

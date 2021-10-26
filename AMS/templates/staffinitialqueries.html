@@ -1,0 +1,18 @@
+{% extends 'staffproj.html' %}
+{% block content %}
+<br><br>
+
+<a href="/stafflogin/staff/staffmakeaquery"><button type="button">Make a Query</button></a><br><br>
+<form method="POST" >
+    {% csrf_token %}
+    
+    <input type="submit" value="CheckQueryresponsesfrom">
+    <select name="to_who" id="cars">
+        <option value="ADMIN">ADMIN</option>
+        
+    </select>
+    <br><br>
+
+
+
+{% endblock %}

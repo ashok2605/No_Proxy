@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'home','adminfunctionalities'
 ]
 
 MIDDLEWARE = [
@@ -74,9 +75,12 @@ WSGI_APPLICATION = 'AMS.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+   'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Attendance',
+        'USER': 'postgres',
+        'PASSWORD': 'bhagavan2003',
+        'HOST': 'localhost'
     }
 }
 
@@ -128,3 +132,15 @@ STATIC_ROOT=os.path.join(BASE_DIR,"assets")
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "nikhileshbhagavan500@gmail.com"
+EMAIL_HOST_PASSWORD = "gobqexxfddtdfksa"
+
+MEDIA_URL="/media/"
+MEDIA_ROOT=os.path.join(BASE_DIR,"media")
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
