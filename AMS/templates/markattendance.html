@@ -1,0 +1,24 @@
+{% extends 'stproj.html' %}
+{% block content %}
+
+Attendance for {{name}}<br>
+<form method="post">
+{% csrf_token %}
+<label>Pls Enter the code u got to ur mail:</label>
+<br>
+<input type="text" name="code">
+<button type="submit" class="btn btn-primary">Mark</button>
+
+
+
+
+</form>
+
+<form method="POST">
+    {% csrf_token %}
+    Please enter 's' after ur roll number is visible in video frame to mark ur attendance
+    <button type="submit" class="btn btn-primary">Mark Using Face Recognition</button>
+</form>
+
+
+{% endblock %}

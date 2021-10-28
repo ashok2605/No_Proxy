@@ -12,7 +12,9 @@ urlpatterns = [
     path('staffqueries',views.staffqueries,name="staffqueries"),
     path('staffmakeaquery',views.staffmakeaquery,name="staffmakeaquery"),
     path('staffmanagequeries',views.staffmanagequeries,name="staffmanagequeries"),
-    path('staffmanagequeries/<int:id>',views.responsestudentcourse,name="responsestudentcourse")
+    path('staffmanagequeries/<int:id>',views.responsestudentcourse,name="responsestudentcourse"),
+    path('takeattendance',views.takeattendance,name="takeattendance"),
+    path('stoptakingattendance',views.stoptakingattendance,name="stoptakingattendance")
     
 
 

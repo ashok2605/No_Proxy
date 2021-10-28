@@ -8,11 +8,23 @@ import random
 import math
 from .models import *
 from django.db.models import Count, F, Value
+import datetime 
 # Create your views here.
 
 def homepage(request):
+    
     if(request.method=='GET'):
+       
+        if not Absentdates.objects.filter(dates_of_absent=datetime.date.today()).exists():
+
+            a=Absentdates()
         
+        
+            day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+            da = datetime.date.today().weekday()
+            print(day_name[da])
+            a.day=day_name[da]
+            a.save()
         return render(request,'sams.html')
 def nots(request):
     if(request.method=='GET'):

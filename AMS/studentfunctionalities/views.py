@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import random
 import math
-
+from .recognizer import Recognizer
 from home.models import *
 
 def profile(request):
@@ -48,4 +48,56 @@ def queries(request):
 def makeaquery(request):
         a=Student.objects.get(id=request.user.student.id)
         return a.MAKEAQUERY(request) 
+def markattendance(request):
+        if request.method=="GET":
+                a=Student.objects.get(id=request.user.student.id)
+                semester=a.semester
+                branch=a.branch
+                
+                if Course.objects.filter(semester=semester,branch=branch,attendance_taking_status=True).exists():
+                        name=Course.objects.filter(semester=semester,branch=branch,attendance_taking_status=True).first().course_name
+                        return render(request,'markattendance.html',{'name':name})
+                else:
+                        messages.info(request,"no subject is ongoing or ur attendance is noted")
+                        return redirect("/studentlogin/student")
 
+
+        if request.method=="POST":
+                a=Student.objects.get(id=request.user.student.id)
+                ob=None
+                obj=a.attendance_set.all()
+                for j in obj:
+                        if j.cour.filter(attendance_taking_status=True).exists():
+                                ob=j
+                                break
+                details = {
+            'branch':request.user.student.branch,
+            'semester': request.user.student.semester
+            
+            }
+                names = Recognizer(details)
+                students=Student.objects.filter(semester=request.user.student.semester,branch=request.user.student.branch)
+                flag=0
+                for student in students:
+                        if student.user.username==names:
+                                flag=1
+                                break
+
+                if flag==1:
+                        ob.attended_status=True
+                        ob.code=''
+                        ob.attended_classes_count=ob.attended_classes_count+1
+                        ob.save()
+                        messages.info(request,"attendance noted")
+                        return redirect("/studentlogin/student")
+                #if ob.code==request.POST['code']:
+                        #ob.attended_status=True
+                        #ob.code=''
+                        #ob.attended_classes_count=ob.attended_classes_count+1
+                        #ob.save()
+                        #messages.info(request,"attendance noted")
+                        #return redirect("/studentlogin/student")
+                else:
+                        messages.info(request,"try again profile not found is wrong")
+                        return redirect("/studentlogin/student/markattendance")
+               

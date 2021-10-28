@@ -380,12 +380,13 @@
       <div class="text">Attendance Management System</div><br>
     <center><form method="POST">
         {% csrf_token %}
-      {% for ob in obj %}
+     
       {% for i in semesters %}
         <h1><b>SEMESTER {{i}} :</b></h1><br>
        
         {% for j in branches %}
         <b>{{j}}</b>:<br>
+        {% for ob in obj %}
         {% ifequal ob.semester i %}
         {% ifequal ob.branch j %}
      <input type="checkbox" name="removestudents" value="{{ob.id}}" /> {{ob.user.first_name}} {{ob.user.last_name}} , <b>{{ob.user.username}} </b>, {{ob.user.email}}<br />

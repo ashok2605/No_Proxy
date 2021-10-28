@@ -1,0 +1,20 @@
+{% extends 'stproj.html' %}
+{% block content %}
+<br><br>
+<b>ABSENT STUDENTS</b>:
+{% for k in li %}
+👉{{k.user.first_name}} {{k.user.last_name}} , {{k.user.username}} ,{{k.branch}}, {{k.semester}}
+
+{% endfor %}
+<br><br>
+
+<a href="/stafflogin/staff"><button type="button" class="btn btn-primary">Go Back</button></a>
+
+
+
+
+
+
+
+
+{% endblock %}

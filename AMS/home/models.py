@@ -6,11 +6,39 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 import random
+from django.db.models.fields import DateField, IntegerField
 from django.http.response import HttpResponse
 
 from django.shortcuts import render,redirect
 # Create your models here.
-# Create your models here.
+# Create your models here. 
+def faculty_directory_path(instance, filename): 
+    name, ext = filename.split(".")
+    name = instance.user.username
+    filename = name +'.'+ ext 
+    return 'Faculty_Images/{}'.format(filename)
+
+def student_directory_path(instance, filename): 
+    name, ext = filename.split(".")
+    name = instance.user.username 
+    filename = name +'.'+ ext 
+    return 'Student_Images/{}/{}/{}'.format(instance.semester,instance.branch,filename)
+
+class Absentdates(models.Model):
+    dates_of_absent=models.DateField(auto_now_add=True)
+    day=models.CharField(max_length=100,blank=True,null=True)
+
+class Attendance(models.Model):
+    attended_classes_count=models.IntegerField(blank=True,null=True)
+    total_classes_count=models.IntegerField(blank=True,null=True)
+    
+    attended_status=models.BooleanField(default=False)
+    code=models.CharField(max_length=200,null=True,blank=True)
+    absentdates=models.ManyToManyField(Absentdates)
+    stud=models.ForeignKey("Student",on_delete=models.CASCADE,null=True)
+    cour=models.ManyToManyField("Course")
+    limits=models.IntegerField(default=2)
+
 class Query(models.Model):
     question=models.TextField(null=True,blank=True)
     answer=models.TextField(blank=True,null=True)
@@ -27,7 +55,7 @@ class notices(models.Model):
     Notice=models.TextField(null=True,blank=True)
 from .forms import *
 class Professor(models.Model):
-    profprofilepic=models.FileField(upload_to="pictures/",null=True,blank=True)
+    profprofilepic=models.FileField(upload_to=faculty_directory_path,null=True,blank=True)
     user=models.OneToOneField(User,on_delete=models.CASCADE,null=True)
     
     def VIEWSTAFFPROFILE(self,request):
@@ -233,7 +261,7 @@ class Course(models.Model):
         ('15:00-16:00','15:00-16:00'),
 
     ]
-
+    attendance_taking_status=models.BooleanField(default=False)
     professor=models.ForeignKey(Professor,on_delete=SET_NULL,null=True)
     course_syllabus=models.TextField(blank=False)
     course_name = models.CharField(
@@ -295,13 +323,14 @@ class Student(models.Model):
         default='CSE'
     )
     courses=models.ManyToManyField(Course)
-    studprofilepic=models.FileField(upload_to="pictures/",null=True,blank=True)
+    studprofilepic=models.FileField(upload_to=student_directory_path,null=True,blank=True)
 
     def VIEWSTUDENTPROFILE(self,request):
         if request.method=="GET":
             s=Student.objects.get(id=request.user.student.id)
             return render(request,"studentprofile.html",{'s':s})
         if request.method=="POST":
+            
             first_name=request.POST['firstname']
             last_name=request.POST['lastname']
             if len(request.FILES)>0:
@@ -495,6 +524,21 @@ class ADMIN(models.Model):
                             user.save()
                             s=Student(user=user,semester=semester,branch=branch,studprofilepic=studprofilepic)
                             s.save()
+                            
+                            c=Course.objects.filter(semester=semester,branch=branch)
+                            li=[]
+                            for k in c:
+                                li.append(k.course_name)
+                            li=list(set(li))
+                            for j in li:
+                                no=Course.objects.filter(course_name=j,semester=semester,branch=branch)
+                                obj=Attendance(attended_classes_count=0,total_classes_count=0,code='',attended_status=False,stud=s)
+                                obj.save()
+                                for t in no:
+                                    
+                                    obj.cour.add(t)
+                                    obj.save()
+
                             if Course.objects.filter(semester=semester,branch=branch).exists():
                                 for i in Course.objects.filter(semester=semester,branch=branch):
                                     s.courses.add(i)
@@ -610,7 +654,23 @@ class ADMIN(models.Model):
                                                     o=Student.objects.filter(semester=semester,branch=branch)
                                                     for ob in o:
                                                         ob.courses.add(c)
-                                                    
+                                                        obj=None
+                                                        flag=0
+                                                        if ob.attendance_set.all().exists():
+                                                           for j in ob.attendance_set.all():
+                                                               if j.cour.filter(course_name=course_name).exists():
+                                                                   flag=1
+                                                                   obj=j
+                                                                   break
+
+                                                        if flag==0:
+                                                            obj=Attendance(attended_classes_count=0,total_classes_count=0,code='',attended_status=False,stud=ob)
+                                                            obj.save()
+                                                            obj.cour.add(c)
+                                                            obj.save()
+                                                        else:
+                                                            obj.cour.add(c)
+                                                        
                                                         ob.save()
                                 messages.info(request,"course scheduled successfully")
                                 return redirect("/adminlogin/admin/addcourse")
@@ -839,10 +899,12 @@ class ADMIN(models.Model):
                     f=0
                     flag=""
                     prof=Course.objects.filter(course_name=course_name).first().professor
+                    att=Course.objects.filter(course_name=course_name).first().attendance_set.all()
                     if monlen+tueslen+wedlen+thulen+frilen>0:
                         for i in li:
                             if len(request.POST.getlist(i))>0:
                                 
+                                print(att)
                                 Course.objects.filter(course_name=course_name,day=i).delete()
                                 for j in request.POST.getlist(i):
                                     if Course.objects.filter(semester=sem,branch=bran,day=i,time=j).exists():
@@ -853,12 +915,17 @@ class ADMIN(models.Model):
                                         f=1
                                         continue
                                     else:
+
                                         c=Course(course_name=course_name,semester=sem,branch=bran,day=i,time=j,professor=prof)
                                         c.save()
                                         s=Student.objects.filter(semester=sem,branch=bran)
                                         for stu in s:
                                             stu.courses.add(c)
                                             stu.save()
+                                        for k in att:
+                                            k.cour.add(c)
+                                            
+                                        
                             else:
                                 continue
 

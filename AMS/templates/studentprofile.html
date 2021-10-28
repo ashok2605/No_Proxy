@@ -20,9 +20,9 @@
                 </div>
                 <label>Firstname:</label><input type="text" name="firstname" value="{{s.user.first_name}}" required><br><br>
              <label>Lastname:</label><input type="text" name="lastname" value="{{s.user.last_name}}" required><br><br>
-             <label>Email:</label><input type="email" name="email" placeholder="{{s.user.email}}" readonly required><br><br>
-             <label>Semester:</label><input type="email" name="email" placeholder="{{s.semester}}" readonly required><br><br>
-             <label>Branch:</label><input type="email" name="email" placeholder="{{s.branch}}" readonly required><br><br>
+             <label>Email:</label><input type="email" name="email" placeholder="{{s.user.email}}"  required><br><br>
+             <label>Semester:</label><input type="email" name="semester" placeholder="{{s.semester}}" readonly required><br><br>
+             <label>Branch:</label><input type="email" name="branch" placeholder="{{s.branch}}" readonly required><br><br>
 
              
              <!--{{ form.semester.errors }}
@@ -32,7 +32,7 @@
              <label for="{{ form.branch.id_for_label }}" >branch:</label>
              {{ form.branch }}<br><br>-->
              <label>Change ProfilePic:</label><input type="file" id="fileopen" name="studprofilepic" onchange="readURL(this);" accept=".pgj,.jpeg,.png"><br><button type="button" id="clear">Reset Pic</button><br><br>
-             <label>Student Id:</label><input type="text" name="id" placeholder="{{s.user.username}}" readonly required><br><br>
+             <label>Student Id:</label><input type="text" name="id" placeholder="{{s.user.username}}"  required><br><br>
              
              <!--<label>Password:</label><input type="password" name="password1"><br><br>
              <label>ConfirmPassword:</label><input type="password"name="password2"><br>-->

@@ -1,0 +1,35 @@
+{% extends 'staffproj.html' %}
+{% block content %} 
+{% if b %}
+
+Already taking attendance for {{x}}
+
+<form method="POST" action="/stafflogin/staff/stoptakingattendance">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-primary ">STOP TAKING ATTENDANCE</button>
+</form>
+
+
+{% else %}
+<form method="POST" id="post-form">
+{% csrf_token %}
+<label for="cars">Choose a Course:</label>
+
+<select name="course" id="cour">
+    {% for k in li %}
+  <option value="{{k}}">{{k}}</option>
+  {% endfor %}
+</select> 
+<br><br>
+<!--<input type="submit" class="check" value="START TAKING ATTENDANCE">-->
+<button type="submit" class="btn btn-primary check">START TAKING ATTENDANCE</button>
+<br><br><br>
+
+</form>
+
+<form method="POST" action="/stafflogin/staff/stoptakingattendance">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary te">STOP TAKING ATTENDANCE</button>
+</form>
+{% endif %}
+{% endblock %}

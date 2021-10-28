@@ -253,6 +253,9 @@
   transition: all 0.5s ease;
   z-index: 2;
 }
+.te{
+  display:none;
+}
 .sidebar.open ~ .home-section{
   left: 250px;
   width: calc(100% - 250px);
@@ -338,6 +341,13 @@
       </a>
       <span class="tooltip">MANAGE QUERIES</span>
     </li>
+    <li>
+      <a href="/stafflogin/staff/takeattendance">
+        <i class='bx bx-chat' ></i>
+        <span class="links_name">TAKE ATTENDANCE</span>
+      </a>
+      <span class="tooltip">TAKE ATTENDANCE</span>
+    </li>
      
      
      <li class="profile">
@@ -358,8 +368,38 @@
       {% endblock %}
 
   </section>
-  <script>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.js" 
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+    crossorigin="anonymous"></script>
+
+
+ <script>
+  $(document).on('submit','#post-form',function(e){
+    e.preventDefault();
+    $.ajax({
+        type:'POST',
+        url:'http://127.0.0.1:8000/stafflogin/staff/takeattendance',
+        data:
+        {   course:$("#cour").val(),
+           
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+        },
+        success:function(data){
+              alert('Started taking attendance');
+                }
+        })
+    }); 
+ 
+
+  
+  document.querySelector(".check").addEventListener("click", function(e){
     
+    this.style.display="none";
+    
+  document.querySelector(".te").style.display="inline-block";
+    
+  } );
   let sidebar = document.querySelector(".sidebar");
   let closeBtn = document.querySelector("#btn");
   let searchBtn = document.querySelector(".bx-search");
