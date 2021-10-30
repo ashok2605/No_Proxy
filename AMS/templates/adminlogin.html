@@ -235,6 +235,7 @@ text-align:center;
 <title>SAMS</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -326,8 +327,9 @@ text-align:center;
 <input type="text" name="admin_username"  placeholder="                Username" required><br><br>
 <label>Password : </label>
 
-<input type="password" name="admin_password" placeholder="                 Password" required><br>
-<br><a href="#">Forgot password?</a><br>
+<input type="password" name="admin_password" class="p1" placeholder="                 Password" required>
+<i class="far fa-eye" id="togglePassword" style="margin-left: -30px; cursor: pointer;"></i>
+<br><a href="/forgotpassword">Forgot password?</a><br>
 <br><input type="submit" value="Login" class="h">
 </form>
 </div>
@@ -336,6 +338,16 @@ text-align:center;
 
 
 <script>
+  const password = document.querySelector('.p1');
+ 
+    togglePassword.addEventListener('click', function (e) {
+      // toggle the type attribute
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      
+      // toggle the eye slash icon
+      this.classList.toggle('fa-eye-slash');
+  });
 // Automatic Slideshow - change image every 4 seconds
 var myIndex = 0;
 carousel();

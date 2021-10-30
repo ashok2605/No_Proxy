@@ -17,7 +17,7 @@ def find(details,request):
         name=request.user.username
         with open(name+'.png','wb') as f:
                 f.write(base64.b64decode(image_data))
-
+        print(os.path.isfile(name+".png"))
         unknown_image=face_recognition.load_image_file(name+'.png')
         unknown_face_encoding = face_recognition.face_encodings(unknown_image)
         if len(unknown_face_encoding) > 0:
@@ -36,14 +36,17 @@ def find(details,request):
         # os.chdir("..")
         base_dir = os.getcwd()
         image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','Student_Images',details['semester'],details['branch']))
+        print(image_dir)
+       
         # print(image_dir)
         
         known_face_names = []
-     
+        
+        
 
         for root,dirs,files in os.walk(image_dir):
                 for file in files:
-                        if file.endswith('jpg') or file.endswith('png'):
+                        if file.endswith('jpg') or file.endswith('png') or file.endswith('jpeg') :
                                 path = os.path.join(root, file)
                                 img = face_recognition.load_image_file(path)
                                 label = file[:len(file)-4]
@@ -117,34 +120,38 @@ def markattendance(request):
 
 
         if request.method=="POST":
-                a=Student.objects.get(id=request.user.student.id)
-                ob=None
-                obj=a.attendance_set.all()
-                for j in obj:
-                        if j.cour.filter(attendance_taking_status=True).exists():
-                                ob=j
-                                break
-                details = {
-                'branch':request.user.student.branch,
-                'semester': request.user.student.semester
+                if Course.objects.filter(semester=request.user.student.semester,branch=request.user.student.branch,attendance_taking_status=True).exists():
+                        a=Student.objects.get(id=request.user.student.id)
+                        ob=None
+                        obj=a.attendance_set.all()
+                        for j in obj:
+                                if j.cour.filter(attendance_taking_status=True).exists():
+                                        ob=j
+                                        break
+                        details = {
+                        'branch':request.user.student.branch,
+                        'semester': request.user.student.semester
             
-                }
+                        }
                 #names = Recognizer(details)
                 #students=Student.objects.filter(semester=request.user.student.semester,branch=request.user.student.branch)
                 #flag=0
                 #for student in students:
                         #if student.user.username==names:
 #                               # break
-                s=find(details,request)
-                print(s)
-                if s=="USERFOUND":
-                        ob.attended_status=True
-                        ob.code=''
-                        ob.attended_classes_count=ob.attended_classes_count+1
-                        ob.save()
-                        return JsonResponse({'success':'FOUND'})
+                        s=find(details,request)
+                        print(s)
+                        if s=="USERFOUND":
+                                ob.attended_status=True
+                                ob.code=''
+                                ob.attended_classes_count=ob.attended_classes_count+1
+                                ob.save()
+                                return JsonResponse({'success':'FOUND'})
+                        else:
+                                return JsonResponse({'success':'NOTFOUND'})
                 else:
-                        return JsonResponse({'success':'NOTFOUND'})
+                        messages.info(request,"sorry time is over,attendance not noted")
+                        return JsonResponse({'success':'timeover'})
                 
                 
                 
@@ -172,4 +179,13 @@ def attended(request):
         messages.info(request,"Ur attendance is noted")
         return redirect("/studentlogin/student")
 def stats(request):
-        return render(request,"studentstats.html")
+        s=request.user.student
+        li=s.courses.all()
+        listofcourses=[]
+        for j in li:
+                listofcourses.append(j.course_name)
+        l=list(set(listofcourses))
+        return render(request,"studentstats.html",{'l':l})
+def specificstats(request,coursename):
+        a=Student.objects.get(id=request.user.student.id)
+        return a.VIEWSTATS(request,coursename)

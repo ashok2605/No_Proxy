@@ -14,17 +14,17 @@ import datetime
 def homepage(request):
     
     if(request.method=='GET'):
-       
-        if not Absentdates.objects.filter(dates_of_absent=datetime.date.today()).exists():
+        
+        #if not Absentdates.objects.filter(dates_of_absent=datetime.date.today()).exists():
 
-            a=Absentdates()
+         #   a=Absentdates()
         
         
-            day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
-            da = datetime.date.today().weekday()
-            print(day_name[da])
-            a.day=day_name[da]
-            a.save()
+          #  day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+           # da = datetime.date.today().weekday()
+           # print(day_name[da])
+           # a.day=day_name[da]
+            #a.save()
         return render(request,'sams.html')
 def nots(request):
     if(request.method=='GET'):
@@ -119,3 +119,68 @@ def checkout(request):
     auth.logout(request)
     
     return redirect("/")
+
+
+def GENERATEOTP():
+    s="0123456789"
+    b=""
+    for i in range(8):
+        b=b+s[int(random.random()*10)]
+    return b
+def forgotpassword(request):
+    if request.method=='GET':
+        return render(request,"forgotpassword.html")
+    if request.method=='POST':
+        username=request.POST["username"]
+        email=request.POST["email"]
+        if User.objects.filter(username=username,email=email).exists():
+            obj=User.objects.get(username=username,email=email)
+            print("I m dead")
+            subject = 'Donot reply'
+            otp=GENERATEOTP()
+            name=obj.username
+            message = 'Hi'+name+"YOUR OTP TO SET NEW PASSWORD IS "+otp
+            recipient_list = [obj.email]
+            email_from = settings.EMAIL_HOST_USER
+            send_mail(subject,message, email_from, recipient_list )
+            print("i am here")
+            if Password.objects.filter(passwordchangerid=obj.id).exists():
+                p=Password.objects.get(passwordchangerid=obj.id)
+                p.passwordchangerotp=otp
+                p.save()
+                print(p)
+            else:
+                p=Password(passwordchangerid=obj.id,passwordchangerotp=otp)
+                p.save()
+
+            return redirect("/forgotpassword/confirm/"+str(obj.id))
+        else:
+            messages.info(request,"USERNAME AND EMAIL ARE NOT MATCHING OR NOT FOUND")
+            return redirect("/forgotpassword")
+
+def lemmecheck(request,passwordchangerid):
+    if request.method=="GET":
+        
+        return render(request,"confirm.html")
+    if request.method=="POST":
+        
+        password1=request.POST['password1']
+        password2=request.POST['password2']
+        if password1==password2:
+            if Password.objects.get(passwordchangerid=int(passwordchangerid)).passwordchangerotp==request.POST["OTP"]:
+                u=User.objects.get(id=int(passwordchangerid))
+                u.set_password(password1)
+                u.save()
+                p=Password.objects.get(passwordchangerid=int(passwordchangerid))
+                p.passwordchangerotp=''
+                p.save()
+
+                messages.info(request,"password changed successfully")
+                return redirect("/")
+            else:
+                messages.info(request,"OTP's not matching,check again")
+                return redirect("/forgotpassword/confirm/"+passwordchangerid)
+        else:
+            messages.info(request,"PASSWORD's not matching")
+            return redirect("/forgotpassword/confirm/"+passwordchangerid)
+

@@ -13,7 +13,8 @@ urlpatterns = [
     path('makeaquery',views.makeaquery,name="makeaquery"),
     path('markattendance',views.markattendance,name="markattendance"),
     path('attended',views.attended,name="attended"),
-    path('stats',views.stats,name="stats")
+    path('stats',views.stats,name="stats"),
+    path('stats/<str:coursename>',views.specificstats,name="specificstats")
     
   
     

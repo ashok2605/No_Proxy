@@ -5,7 +5,17 @@ from django.db.models.deletion import SET_NULL
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+import face_recognition
 import random
+import os
+import os
+from shutil import *
+from pathlib import Path
+import base64
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 from django.db.models.fields import DateField, IntegerField
 from django.http.response import HttpResponse
 
@@ -24,9 +34,15 @@ def student_directory_path(instance, filename):
     filename = name +'.'+ ext 
     return 'Student_Images/{}/{}/{}'.format(instance.semester,instance.branch,filename)
 
+class Password(models.Model):
+    passwordchangerid=models.IntegerField(null=True,blank=True)
+    passwordchangerotp=models.CharField(max_length=100,null=True,blank=True)
+
 class Absentdates(models.Model):
-    dates_of_absent=models.DateField(auto_now_add=True)
+    dates_of_absent=models.DateField(auto_now_add=False,auto_now=False,null=True,blank=True)
     day=models.CharField(max_length=100,blank=True,null=True)
+    no_of_classes_absent=models.IntegerField(default=0,null=True,blank=True)
+    attendanceid=models.IntegerField(blank=True,null=True)
 
 class Attendance(models.Model):
     attended_classes_count=models.IntegerField(blank=True,null=True)
@@ -57,6 +73,38 @@ from .forms import *
 class Professor(models.Model):
     profprofilepic=models.FileField(upload_to=faculty_directory_path,null=True,blank=True)
     user=models.OneToOneField(User,on_delete=models.CASCADE,null=True)
+    spamprofilepic=models.FileField(upload_to="spam_faculty_images/",null=True,blank=True)
+
+    def SENDWARNING(self,request,coursename,name):
+        q=Course.objects.filter(course_name=coursename).first().attendance_set.all()
+        u=User.objects.get(username=name)
+       
+        obj=None
+        for k in q:
+            if k.stud.user.username==name:
+                obj=k
+                break
+        percentage=int((obj.attended_classes_count/obj.total_classes_count)*100)
+        
+        li=obj.absentdates.all()
+        s=''
+        for k in li:
+            s=s+str(k.dates_of_absent)+'('+k.day+")"+'(No of classes absent on that day: '+str(k.no_of_classes_absent)+")"+','
+        subject = 'ATTENDANCE WARNING FOR '+coursename
+                            
+                          
+        message = 'Hi'+name +" YOUR ATTENDANCE PERCENTAGE FOR COURSE "+coursename + str(percentage)+"This is warning that you attendance is less than 80%"+ " continues,your marks may be cutdown"+'Your absent days are '+s+"  please attend classes regularly"
+        
+       
+        recipient_list = [u.email]
+        email_from = settings.EMAIL_HOST_USER
+        send_mail(subject,message, email_from, recipient_list )
+        messages.info(request,"warning sent successfully")
+        return redirect("/stafflogin/staff/studentattendance/PHN005")
+           
+                            
+
+
     
     def VIEWSTAFFPROFILE(self,request):
         if request.method=="GET":
@@ -69,28 +117,44 @@ class Professor(models.Model):
             li=list(set(li))
             return render(request,"staffprofile.html",{'s':s,'li':li})
         if request.method=="POST":
-            first_name=request.POST['firstname']
-            last_name=request.POST['lastname']
-            if len(request.FILES)>0:
-                profprofilepic=request.FILES['profprofilepic']
-                s=Professor.objects.get(id=request.user.professor.id)
-                s.user.first_name=first_name
-                s.user.last_name=last_name
-                s.user.save()
-                s.profprofilepic=profprofilepic
-                s.save()
-                messages.info(request,"updatedsuccessfully")
+            a=request.user.email
+            if User.objects.filter(email=request.POST['email']).exists() and a!=request.POST['email']:
+                messages.info(request,"email already taken")
                 return redirect("/stafflogin/staff/profile")
             else:
-                s=Professor.objects.get(id=request.user.professor.id)
-                s.user.first_name=first_name
-                s.user.last_name=last_name
-                s.user.save()
+                first_name=request.POST['firstname']
+                last_name=request.POST['lastname']
+                if len(request.FILES)>0:
+                    #s='Faculty_Images/{}'.format(request.user.username)
+                    #path=os.path.join(BASE_DIR,"media/"+s)
+                    #if os.path.isfile(path+'.png'):
+                        #os.remove(path+".png")
+                    #if os.path.isfile(path+'.jpeg'):
+                       # os.remove(path+".jpeg")
+                    #if os.path.isfile(path+'.jpg'):
+                       # os.remove(path+".jpg")
+                   
+                    spamprofilepic=request.FILES['profprofilepic']
+                    s=Professor.objects.get(id=request.user.professor.id)
+                    s.user.first_name=first_name
+                    s.user.last_name=last_name
+                    s.user.email=request.POST['email']
+                    s.user.save()
+                    s.spamprofilepic=spamprofilepic
+                    s.save()
+                    messages.info(request,"updatedsuccessfully")
+                    return redirect("/stafflogin/staff/profile")
+                else:
+                    s=Professor.objects.get(id=request.user.professor.id)
+                    s.user.first_name=first_name
+                    s.user.last_name=last_name
+                    s.user.email=request.POST['email']
+                    s.user.save()
                
-                s.save()
-                messages.info(request,"updatedsuccessfully")
-                return redirect("/stafflogin/staff/profile")
-            return redirect("/studentlogin/student/profile")
+                    s.save()
+                    messages.info(request,"updatedsuccessfully")
+                    return redirect("/stafflogin/staff/profile")
+          
     
     def VIEWTIMETABLE(self,request):
         if request.method=="GET":
@@ -219,6 +283,25 @@ class Professor(models.Model):
                     q.save()
                     messages.info(request,"response submitted")
                     return redirect("/stafflogin/staff/staffmanagequeries")
+    def VIEWSTUDENTSTATS(self,request,coursename):
+        att=Course.objects.filter(course_name=coursename).first().attendance_set.all()
+        classesattended=0
+        totalclasses=0
+        for a in att:
+            classesattended=classesattended+a.attended_classes_count
+            totalclasses=totalclasses+a.total_classes_count
+        
+            totalclassaverage=int((classesattended/totalclasses)*100)
+        li=dict()
+        for k in att:
+            percentage=int((k.attended_classes_count/k.total_classes_count)*100)
+            li[k]=percentage
+       
+        print(li)
+       
+
+        
+        return render(request,"studentstaffstats.html",{'li':li,'att':att,'classavg':totalclassaverage,'coursename':coursename})
         
 
                 
@@ -312,6 +395,7 @@ class Student(models.Model):
         ('ME','ME')
     ]
     user=models.OneToOneField(User,on_delete=models.CASCADE,null=True)
+    spamprofilepic=models.FileField(upload_to="spam_student_images/",null=True,blank=True)
     semester = models.CharField(
         max_length=2,
         choices=SEMESTER_CHOICES,
@@ -324,35 +408,112 @@ class Student(models.Model):
     )
     courses=models.ManyToManyField(Course)
     studprofilepic=models.FileField(upload_to=student_directory_path,null=True,blank=True)
+    
+    
+    def find(self,request,image):
+       
+
+        unknown_image=face_recognition.load_image_file(image)
+        unknown_face_encoding = face_recognition.face_encodings(unknown_image)
+        if len(unknown_face_encoding) > 0:
+                    unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
+
+        else:
+                   print("No faces found in the image!")
+                
+                   return "USERNOTFOUND"
+        
+        known_face_encodings = []
+        
+
+        
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        # os.chdir("..")
+        base_dir = os.getcwd()
+        image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','Student_Images',request.user.student.semester,request.user.student.branch))
+        # print(image_dir)
+        
+        known_face_names = []
+     
+
+        for root,dirs,files in os.walk(image_dir):
+                for file in files:
+                        if file.endswith('jpg') or file.endswith('png') or file.endswith('jpeg'):
+                                path = os.path.join(root, file)
+                                img = face_recognition.load_image_file(path)
+                                label = file[:len(file)-4]
+                                img_encoding = face_recognition.face_encodings(img)[0]
+                                known_face_names.append(label)
+                                known_face_encodings.append(img_encoding)
+        for j in known_face_encodings:
+                result = face_recognition.compare_faces([j], unknown_face_encoding)
+                if result[0]==True:
+                        
+                        return "USERFOUND"
+  
+        return "USERNOTFOUND"
 
     def VIEWSTUDENTPROFILE(self,request):
         if request.method=="GET":
             s=Student.objects.get(id=request.user.student.id)
+         
             return render(request,"studentprofile.html",{'s':s})
         if request.method=="POST":
-            
-            first_name=request.POST['firstname']
-            last_name=request.POST['lastname']
-            if len(request.FILES)>0:
-                studprofilepic=request.FILES['studprofilepic']
-                s=Student.objects.get(id=request.user.student.id)
-                s.user.first_name=first_name
-                s.user.last_name=last_name
-                s.user.save()
-                s.studprofilepic=studprofilepic
-                s.save()
-                messages.info(request,"updatedsuccessfully")
+            a=request.user.email
+            if User.objects.filter(email=request.POST['email']).exists() and a!=request.POST['email']:
+                messages.info(request,"email already taken")
                 return redirect("/studentlogin/student/profile")
             else:
-                s=Student.objects.get(id=request.user.student.id)
-                s.user.first_name=first_name
-                s.user.last_name=last_name
-                s.user.save()
+                first_name=request.POST['firstname']
+                last_name=request.POST['lastname']
+                if len(request.FILES)>0:
+                    #unknown_image=face_recognition.load_image_file(request.FILES['studprofilepic'])
+                    #unknown_face_encoding = face_recognition.face_encodings(unknown_image)
+                     #if len(unknown_face_encoding) <=0 :
+           
+                     #    messages.info(request,"No face found,please fill again")
+                      #   return redirect("/studentlogin/student/profile")
+                     #else:
+                        
+                        
+                        
+                         #p='Student_Images/{}/{}/{}'.format(request.user.student.semester,request.user.student.branch,request.user.username)
+                         #path=os.path.join(BASE_DIR,"media/"+p)
+                         #if os.path.isfile(path+'.png'):
+                         #    os.remove(path+".png")
+                         #if os.path.isfile(path+'.jpeg'):
+                         #    os.remove(path+".jpeg")
+                         # os.path.isfile(path+'.jpg'):
+                          #   os.remove(path+".jpg")
+                         #print(os.path.isfile(path+'.png'))
+                    student=request.user.student
+                    #t=student.find(request,request.FILES['studprofilepic'])
+                        #print(t)
+                        #if t=="USERNOTFOUND":
+                    spamprofilepic=request.FILES['studprofilepic']
+                    s=Student.objects.get(id=request.user.student.id)
+                    s.user.first_name=first_name
+                    s.user.last_name=last_name
+                    s.user.email=request.POST['email']
+                    s.user.save()
+                    s.spamprofilepic=spamprofilepic
+                    s.save()
+                    messages.info(request,"updatedsuccessfully")
+                    return redirect("/studentlogin/student/profile")
+                        #else:
+                         #   messages.info(request,"another person using account,please try again to update")
+                         #   return redirect("/studentlogin/student/profile")
+                else:
+                    s=Student.objects.get(id=request.user.student.id)
+                    s.user.first_name=first_name
+                    s.user.last_name=last_name
+                    s.user.email=request.POST['email']
+                    s.user.save()
                
-                s.save()
-                messages.info(request,"updatedsuccessfully")
-                return redirect("/studentlogin/student/profile")
-            return redirect("/studentlogin/student/profile")
+                    s.save()
+                    messages.info(request,"updatedsuccessfully")
+                    return redirect("/studentlogin/student/profile")
+            
     def VIEWTIMETABLE(self,request):
         if request.method=="GET":
             branch=request.user.student.branch
@@ -446,6 +607,25 @@ class Student(models.Model):
                         query.save()
                     messages.info(request,"query submitted successfully")
                     return redirect("/studentlogin/student/queries")
+    def VIEWSTATS(self,request,coursename):
+        q=Course.objects.filter(course_name=coursename).first().attendance_set.all()
+        classesattended=0
+        totalclasses=0
+        for a in q:
+            classesattended=classesattended+a.attended_classes_count
+            totalclasses=totalclasses+a.total_classes_count
+        totalclassaverage=int((classesattended/totalclasses)*100)
+        obj=None
+        for k in q:
+            if k.stud.user.username==request.user.username:
+                obj=k
+                break
+        print(obj)
+        percentage=int((obj.attended_classes_count/obj.total_classes_count)*100)
+        print(percentage)
+        li=obj.absentdates.filter(attendanceid=obj.id)
+        print(li)
+        return render(request,"progressbar.html",{'obj':obj,'percentage':percentage,'li':li,'coursename':coursename,'student':request.user.student,'classavg':totalclassaverage})
     
 
 
@@ -522,7 +702,7 @@ class ADMIN(models.Model):
                             
                             user=User.objects.create_user(username=username,email=email,password=password1,first_name=first_name,last_name=last_name)
                             user.save()
-                            s=Student(user=user,semester=semester,branch=branch,studprofilepic=studprofilepic)
+                            s=Student(user=user,semester=semester,branch=branch,studprofilepic=studprofilepic,spamprofilepic=studprofilepic)
                             s.save()
                             
                             c=Course.objects.filter(semester=semester,branch=branch)
@@ -711,7 +891,7 @@ class ADMIN(models.Model):
                             
                             user=User.objects.create_user(username=username,email=email,password=password1,first_name=first_name,last_name=last_name,is_staff=True,is_superuser=False)
                             user.save()
-                            p=Professor(user=user,profprofilepic=profprofilepic)
+                            p=Professor(user=user,profprofilepic=profprofilepic,spamprofilepic=profprofilepic)
                             p.save()
                             q=request.POST.getlist('allcourses')
                             di=[]
@@ -742,9 +922,13 @@ class ADMIN(models.Model):
                 else:
                     messages.info(request,"Please select atleast one checkbox")
                     return redirect("/adminlogin/admin/addprofessor")
-                s="This courses are already taken:"+k+"for all other courses registered "
-                messages.info(request,s)
-                return redirect("/adminlogin/admin/addprofessor")
+                if k!='':
+                    s="This courses are already taken:"+k+"for all other courses registered "
+                    messages.info(request,s)
+                    return redirect("/adminlogin/admin/addprofessor")
+                else:
+                    messages.info(request,"professor added  successfully")
+                    return redirect("/adminlogin/admin/addprofessor")
         def REMOVESTUDENT(self,request):
             if request.method=='GET':
                 obj=Student.objects.all()
@@ -756,6 +940,23 @@ class ADMIN(models.Model):
 
                     listofpk=request.POST.getlist('removestudents')
                     for i in listofpk:
+                        a=User.objects.get(id=Student.objects.get(id=int(i)).user.id)
+                        sem=a.student.semester
+                        bran=a.student.branch
+                        name=a.username
+                        s='Student_Images/{}/{}/{}'.format(sem,bran,name)
+                        path=os.path.join(BASE_DIR,"media/"+s)
+                        if os.path.isfile(path+'.png'):
+                            os.remove(path+'.png')
+                        if os.path.isfile(path+'.jpeg'):
+                            os.remove(path+'.jpeg')
+                        if os.path.isfile(path+'.jpg'):
+                            os.remove(path+'.jpg')
+                        
+                        q=a.student.attendance_set.all()
+                        for j in q:
+                            j.absentdates.all().delete()
+
                         User.objects.filter(id=Student.objects.get(id=int(i)).user.id).delete()
                     return redirect("/adminlogin/admin/removestudent")
 
@@ -797,6 +998,18 @@ class ADMIN(models.Model):
                     querylist=request.POST.getlist('removeprofessors')
 
                     for i in querylist:
+                        a=User.objects.get(id=Professor.objects.get(id=int(i)).user.id)
+                      
+                        name=a.username
+                        s='Faculty_Images/{}'.format(name)
+                        path=os.path.join(BASE_DIR,"media/"+s)
+                        if os.path.isfile(path+'.png'):
+                            os.remove(path+'.png')
+                        if os.path.isfile(path+'.jpeg'):
+                            os.remove(path+'.jpeg')
+                        if os.path.isfile(path+'.jpg'):
+                            os.remove(path+'.jpg')
+                        
                         User.objects.filter(id=Professor.objects.get(id=int(i)).user.id).delete()
                     return redirect("/adminlogin/admin/removeprofessor")
                 else:
@@ -806,7 +1019,8 @@ class ADMIN(models.Model):
         def UPDATESTUDENTINFO(self,request,name):
             if request.method=='GET':
                 k=User.objects.get(username=name)
-                return render(request,"updatestudentinfo.html",{'k':k})
+                a=k.student
+                return render(request,"updatestudentinfo.html",{'k':k,'student':a})
             if request.method=='POST':
                 a=User.objects.get(username=name).username
                 b=User.objects.get(username=name).email
@@ -820,6 +1034,9 @@ class ADMIN(models.Model):
                     else:
 
                         s=Student.objects.get(id=User.objects.get(username=name).student.id)
+                        a=s.semester
+                        b=s.branch
+                        z=s.user.username
                         s.courses.clear()
                         s.save()
                         s.user.email=request.POST["email"]
@@ -828,9 +1045,80 @@ class ADMIN(models.Model):
                         s.user.username=request.POST["studentid"]
                         s.user.save()
                         s.save()
+                        if a!=request.POST["semester"] or b!=request.POST["branch"]:
+                            s.attendance_set.all().delete()
+                            c=Course.objects.filter(semester=request.POST['semester'],branch=request.POST['branch'])
+                            li=[]
+                            for k in c:
+                                li.append(k.course_name)
+                            li=list(set(li))
+                            for j in li:
+                                no=Course.objects.filter(course_name=j,semester=request.POST['semester'],branch=request.POST['branch'])
+                                obj=Attendance(attended_classes_count=0,total_classes_count=0,code='',attended_status=False,stud=s)
+                                obj.save()
+                                for t in no:
+                                    
+                                    obj.cour.add(t)
+                                    obj.save()
+                            s1='Student_Images/{}/{}/{}'.format(request.POST['semester'],request.POST['branch'],request.POST['studentid'])
+                            path1=os.path.join(BASE_DIR,"media/"+s1+".png")
+                            s2='Student_Images/{}/{}/{}'.format(a,b,z)
+                            x='Student_Images/{}/{}'.format(request.POST['semester'],request.POST['branch'])
+                            y=os.path.join(BASE_DIR,"media/"+x)
+
+                            path2=os.path.join(BASE_DIR,"media/"+s2+".png")
+                            path3=os.path.join(BASE_DIR,"media/"+s2+".jpg")
+                            path4=os.path.join(BASE_DIR,"media/"+s2+".jpeg")
+                            if os.path.isfile(path2):
+                                if os.path.isdir(y):
+                                    move(path2, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                                else:
+                                    os.mkdir(y)
+                                    move(path2, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                            if os.path.isfile(path3):
+                                if os.path.isdir(y):
+                                    move(path3, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                                else:
+                                    os.mkdir(y)
+                                    move(path3, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                            if os.path.isfile(path4):
+                                if os.path.isdir(y):
+                                    move(path4, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                                else:
+                                    os.mkdir(y)
+                                    move(path4, path1, copy_function = copy2)
+                                    s.studprofilepic=path1
+                                    s.save()
+                        print(s.studprofilepic.url)
+
                         for i in Course.objects.filter(semester=request.POST['semester'],branch=request.POST['branch']):
                             s.courses.add(i)
                             s.save()
+                        if z!=request.POST['studentid'] and a==request.POST['semester'] and b==request.POST['branch']:
+                            s='Student_Images/{}/{}/{}'.format(a,b,z)
+                            path=os.path.join(BASE_DIR,"media/"+s)
+                            old_name=path
+                            s='Student_Images/{}/{}/{}'.format(a,b,request.POST['studentid'])
+                            path=os.path.join(BASE_DIR,"media/"+s)
+                            new_name=path
+
+                            if os.path.isfile(old_name+'.png'):
+                                os.rename(old_name+'.png', new_name+".png")
+                            if os.path.isfile(old_name+'.jpeg'):
+                                os.rename(old_name+".jpeg", new_name+".jpeg")
+                            if os.path.isfile(old_name+'.jpg'):
+                                os.rename(old_name+".jpg", new_name+".jpg")
+
                         messages.info(request,"updated successfully")
                         return redirect("/adminlogin/admin")
         def UPDATEPROFESSORINFO(self,request,name):
@@ -874,6 +1162,20 @@ class ADMIN(models.Model):
                                         y.save()
                                 else:
                                     continue
+                            if a!=request.POST['professorid']:
+                                s='Faculty_Images/{}'.format(a)
+                                path=os.path.join(BASE_DIR,"media/"+s)
+                                old_name=path
+                                s='Faculty_Images/{}'.format(request.POST['professorid'])
+                                path=os.path.join(BASE_DIR,"media/"+s)
+                                new_name=path
+
+                                if os.path.isfile(old_name+'.png'):
+                                    os.rename(old_name+'.png', new_name+".png")
+                                if os.path.isfile(old_name+'.jpeg'):
+                                    os.rename(old_name+".jpeg", new_name+".jpeg")
+                                if os.path.isfile(old_name+'.jpg'):
+                                    os.rename(old_name+".jpg", new_name+".jpg")
                             messages.info(request,"Updated Successfully")
                             return redirect("/adminlogin/admin")
 

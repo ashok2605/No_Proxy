@@ -384,21 +384,71 @@
         <label for="semester">semester:</label>
 
 <select name="semester" id="cars" >
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-  <option value="5">5</option>
-  <option value="6">6</option>
-  <option value="7">7</option>
-  <option value="8">8</option>
+{% ifequal k.student.semester "1" %}
+<option value="1" selected>1</option>
+{% else %}
+<option value="1">1</option>
+{% endifequal %}
+{% ifequal k.student.semester "2" %}
+<option value="2" selected>2</option>
+{% else %}
+<option value="2">2</option>
+{% endifequal %}
+{% ifequal k.student.semester "3" %}
+<option value="3" selected>3</option>
+{% else %}
+<option value="3">3</option>
+{% endifequal %}
+  {% ifequal k.student.semester "4" %}
+<option value="4" selected>4</option>
+{% else %}
+<option value="4">4</option>
+{% endifequal %}
+{% ifequal k.student.semester "5" %}
+<option value="5" selected>5</option>
+{% else %}
+<option value="5">5</option>
+{% endifequal %}
+{% ifequal k.student.semester "6" %}
+<option value="6" selected>6</option>
+{% else %}
+<option value="6">6</option>
+{% endifequal %}
+{% ifequal k.student.semester "7" %}
+<option value="7" selected>7</option>
+{% else %}
+<option value="7">7</option>
+{% endifequal %}
+{% ifequal k.student.semester "8" %}
+<option value="8" selected>8</option>
+{% else %}
+<option value="8">8</option>
+{% endifequal %}
+  
 </select><br><br>
 <label for="branch">branch:</label>
 <select name="branch" id="cars" >
-    <option value="CSE">CSE</option>
-    <option value="ECE">ECE</option>
-    <option value="EE">EE</option>
-    <option value="ME">ME</option>
+  {% ifequal k.student.branch "CSE" %}
+<option value="CSE" selected>CSE</option>
+{% else %}
+<option value="CSE">CSE</option>
+{% endifequal %}
+{% ifequal k.student.branch "ECE" %}
+<option value="ECE" selected>ECE</option>
+{% else %}
+<option value="ECE">ECE</option>
+{% endifequal %}
+{% ifequal k.student.branch "ME" %}
+<option value="ME" selected>ME</option>
+{% else %}
+<option value="ME">ME</option>
+{% endifequal %}
+{% ifequal k.student.branch "EE" %}
+<option value="EE" selected>EE</option>
+{% else %}
+<option value="EE">EE</option>
+{% endifequal %}
+   
     
   </select><br><br>
   <label>Studentid:</label><input type="text" name="studentid" placeholder="STUDENTID" required value="{{k.username}}">

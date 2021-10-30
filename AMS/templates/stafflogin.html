@@ -213,6 +213,7 @@ text-align:center;
 
 
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 <body>
 
 <!-- Navbar -->
@@ -254,11 +255,12 @@ text-align:center;
                             </div>
                             <div class="form-group">
                                 <label for="your_pass"><i class="zmdi zmdi-lock"></i></label>
-                                <input type="password" name="your_pass" id="your_pass" placeholder="Password" required>
+                                <input type="password" name="your_pass" class="p1" id="your_pass" placeholder="Password" required>
+                                <!--<i class="far fa-eye" id="togglePassword" style="margin-left: -30px; cursor: pointer;"></i>-->
                             </div>
                             <div class="form-group">
                              
-                                <a href="#"><span class="z">Forgotpassword?</span></a>
+                                <a href="/forgotpassword"><span class="z">Forgotpassword?</span></a>
                             </div>
                             <div class="form-group form-button">
                                 <input type="submit" name="signin" id="signin" class="form-submit" value="Log in"/>
@@ -319,6 +321,16 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+const password = document.querySelector('.p1');
+ 
+togglePassword.addEventListener('click', function (e) {
+  // toggle the type attribute
+  const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+  password.setAttribute('type', type);
+  
+  // toggle the eye slash icon
+  this.classList.toggle('fa-eye-slash');
+});
 </script>
 <script>
   {% for message in messages %}

@@ -4,6 +4,9 @@ from . import views
 urlpatterns = [
 
     path('',views.homepage,name="homepage"),
+    path('forgotpassword',views.forgotpassword,name="forgotpassword"),
+    path('forgotpassword/confirm/<str:passwordchangerid>',views.lemmecheck,name="lemmecheck"),
+
     path('notices',views.nots,name="nots"),
     path('contact',views.contact,name="contact"),
     path('studentlogin',views.studentlogin,name="studentlogin"),

@@ -14,7 +14,17 @@ urlpatterns = [
     path('staffmanagequeries',views.staffmanagequeries,name="staffmanagequeries"),
     path('staffmanagequeries/<int:id>',views.responsestudentcourse,name="responsestudentcourse"),
     path('takeattendance',views.takeattendance,name="takeattendance"),
-    path('stoptakingattendance',views.stoptakingattendance,name="stoptakingattendance")
+    path('stoptakingattendance',views.stoptakingattendance,name="stoptakingattendance"),
+    path('studentattendance',views.studentattendance,name="studentattendance"),
+    path('studentattendance/<str:coursename>',views.staffstudentstats,name="staffstudentstats"),
+    path('studentattendance/<str:coursename>/<str:name>',views.staffspecificstudentstats,name="staffspecificstudentstats"),
+    path('studentattendance/<str:coursename>/<str:name>/sendwarning',views.sendwarning,name="sendwarning"),
+    path('studentattendance/<str:coursename>/<str:name>/modifyattendance',views.modifyattendance,name="modifyattendance"),
+    path('studentattendance/<str:coursename>/<str:name>/addattendance',views.addattendance,name="addattendance"),
+    path('studentattendance/<str:coursename>/<str:name>/deleteattendance',views.deleteattendance,name="deleteattendance")
+
+    
+
     
 
 
