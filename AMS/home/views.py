@@ -14,7 +14,13 @@ import datetime
 def homepage(request):
     
     if(request.method=='GET'):
-        
+        if ADMIN.objects.all().exists():
+            print("hello")
+        else:
+            if User.objects.filter(is_staff=True,is_superuser=True).exists():
+                u=User.objects.get(is_staff=True,is_superuser=True)
+                a=ADMIN(admin_user=u)
+                a.save()
         #if not Absentdates.objects.filter(dates_of_absent=datetime.date.today()).exists():
 
          #   a=Absentdates()
