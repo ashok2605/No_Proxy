@@ -4,8 +4,8 @@
 <center><input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
 </center>
 <ul id="myUL">
-    {% for k in l %}
-  <li><a href="/studentlogin/student/stats/{{k}}">{{k}}</a></li>
+    {% for key,value in d.items %}
+  <li><a href="/studentlogin/student/stats/{{key}}">{{key}}-by {{value.user.username}}[Professor name],{{value.user.email}}[Professor email]</a></li>
   {% endfor %}
 </ul>
 

@@ -41,6 +41,12 @@
   opacity: 0;
   transition: all 0.5s ease;
 }
+.profile-pic{
+  max-width: 200px;
+  max-height:200px;
+  margin: 0 auto;
+  border-radius: 50%;
+}
 .sidebar .logo-details .logo_name{
   color: #fff;
   font-size: 20px;
@@ -386,8 +392,8 @@
              <label>Lastname:</label><input type="text" name="lastname" placeholder="lastname" required><br><br>
              <label>Email:</label><input type="email" name="email" placeholder="email" required><br><br>
 
-             
-             <label>ProfilePic:</label><input type="file" name="profprofilepic"  accept=".pgj,.jpeg,.png" required> <br><br>
+             <img class="img-responsive profile-pic" id="blah" src="" alt="Upload Your Pic" ><br><br>
+             <label>ProfilePic:</label><input type="file" id="upload" name="profprofilepic"  accept=".pgj,.jpeg,.png" required> <br><br>
              <label>Professor Id:</label><input type="text" name="professorid" placeholder="id" required><br><br>
              <label>Courses Taken:</label><br>
              <input type="checkbox" name="allcourses" value="CSN221" /> CSN221<br />
@@ -403,6 +409,7 @@
          <input type="submit" value="Add Professor">
      </form></center>
   </section>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script>
   let sidebar = document.querySelector(".sidebar");
   let closeBtn = document.querySelector("#btn");
@@ -413,10 +420,7 @@
     menuBtnChange();//calling the function(optional)
   });
 
-  searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search iocn
-    sidebar.classList.toggle("open");
-    menuBtnChange(); //calling the function(optional)
-  });
+
 
   // following are the code to change sidebar button(optional)
   function menuBtnChange() {
@@ -426,6 +430,27 @@
      closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
    }
   }
+  $(function(){
+    $('#upload').change(function(){
+      var input = this;
+      var url = $(this).val();
+      var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+      if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) 
+       {
+          var reader = new FileReader();
+  
+          reader.onload = function (e) {
+             $('#blah').attr('src', e.target.result);
+          }
+         reader.readAsDataURL(input.files[0]);
+      }
+      else
+      {
+        $('#blah').attr('src', '');
+      }
+    });
+  
+  });
   </script>
   <script>
     {% for message in messages %}

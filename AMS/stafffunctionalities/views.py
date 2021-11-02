@@ -164,12 +164,14 @@ def sendwarning(request,coursename,name):
         a=Professor.objects.get(id=request.user.professor.id)
         return a.SENDWARNING(request,coursename,name)
 def modifyattendance(request,coursename,name):
-        
+       
+        print(coursename)
+        print(name)
         return render(request,"modifyattendance.html",{'coursename':coursename,'name':name})
 def addattendance(request,coursename,name):
         if request.POST['modifydate']=='':
                 messages.info(request,"Please select date")
-                return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
         else:
                 a=Course.objects.filter(course_name=coursename).first().attendance_set.all()
                 obj=None
@@ -183,7 +185,7 @@ def addattendance(request,coursename,name):
                 print(dt)
                 if obj.attended_classes_count==obj.total_classes_count:
                         messages.info(request,"Seriously,attendance is already 100%")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
                 
                 if obj.absentdates.filter(dates_of_absent=dt).exists():
                         obj.attended_classes_count=obj.attended_classes_count+1
@@ -195,18 +197,18 @@ def addattendance(request,coursename,name):
                                 a.no_of_classes_absent=a.no_of_classes_absent-1
                                 a.save()
                         messages.info(request,"attendance modified successfully")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
                 else:   
                         print(type(request.POST['modifydate']))
                         print(request.POST['modifydate'])
                         obj.attended_classes_count=obj.attended_classes_count+1
                         obj.save()
                         messages.info(request,"attendance modified successfully")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
 def deleteattendance(request,coursename,name):
         if request.POST['modifydate']=='':
                 messages.info(request,"Please select date")
-                return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
         else:
                 a=Course.objects.filter(course_name=coursename).first().attendance_set.all()
                 obj=None
@@ -219,7 +221,7 @@ def deleteattendance(request,coursename,name):
                 print(dt)
                 if obj.attended_classes_count==0:
                         messages.info(request,"seriously,attendance is already 0%")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
                 
                 if obj.absentdates.filter(dates_of_absent=dt).exists():
                         obj.attended_classes_count=obj.attended_classes_count-1
@@ -229,7 +231,7 @@ def deleteattendance(request,coursename,name):
                         a.no_of_classes_absent=a.no_of_classes_absent+1
                         a.save()
                         messages.info(request,"attendance modified successfully")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")
                 else:
                         s=request.POST['modifydate']
                         dt=date(int(s[0:4]),int(s[5:7]),int(s[8:]))
@@ -243,4 +245,4 @@ def deleteattendance(request,coursename,name):
                         obj.absentdates.add(a)
                         obj.save()
                         messages.info(request,"attendance modified successfully")
-                        return redirect("/stafflogin/staff/studentattendance/coursename/name/modifyattendance")
+                        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name+"/modifyattendance")

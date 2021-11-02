@@ -7,7 +7,7 @@ from django.core.mail import send_mail
 import random
 import math
 import os
-from .recognizer import Recognizer
+
 import face_recognition
 from home.models import *
 import base64
@@ -185,7 +185,11 @@ def stats(request):
         for j in li:
                 listofcourses.append(j.course_name)
         l=list(set(listofcourses))
-        return render(request,"studentstats.html",{'l':l})
+        d=dict()
+        for j in l:
+                prof=Course.objects.filter(course_name=j).first().professor
+                d[j]=prof
+        return render(request,"studentstats.html",{'l':l,'d':d})
 def specificstats(request,coursename):
         a=Student.objects.get(id=request.user.student.id)
         return a.VIEWSTATS(request,coursename)

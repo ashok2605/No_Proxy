@@ -668,6 +668,15 @@ class ADMIN(models.Model):
                 b=b+s[int(random.random()*10)]
             print(b)
             return b
+        
+        
+        
+
+        
+        
+        
+        
+
         def ADDSTUDENT(self,request):
             if request.method=="GET":
                 
@@ -688,7 +697,46 @@ class ADMIN(models.Model):
                 if 1>0:
                     if not User.objects.filter(username=username).exists():
                         if not User.objects.filter(email=email).exists():
-                            
+                            unknown_image=face_recognition.load_image_file(request.FILES['studprofilepic'])
+                            unknown_face_encoding = face_recognition.face_encodings(unknown_image)
+                            if len(unknown_face_encoding) <=0 :
+           
+                                messages.info(request,"No face found,please fill again")
+                                return redirect("/adminlogin/admin/addstudent")
+                            details={
+                                'semester':semester,
+                                'branch':branch
+                            }
+                            unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
+                            base_dir = os.path.dirname(os.path.abspath(__file__))
+      
+                            base_dir = os.getcwd()
+                            image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','Student_Images',details['semester'],details['branch']))
+                            print(image_dir)
+       
+       
+        
+                            known_face_names = []
+                            known_face_encodings=[]
+                            for root,dirs,files in os.walk(image_dir):
+                                for file in files:
+                                    if file.endswith('jpg') or file.endswith('png') or file.endswith('jpeg') :
+                                        path = os.path.join(root, file)
+                                        img = face_recognition.load_image_file(path)
+                                        if file.endswith('jpeg'):
+                                            label = file[:len(file)-5]
+                                        else:
+                                            label = file[:len(file)-4]
+                                        img_encoding = face_recognition.face_encodings(img)[0]
+                                        known_face_names.append(label)
+                                        known_face_encodings.append(img_encoding)
+                            for j in known_face_encodings:
+                                result = face_recognition.compare_faces([j], unknown_face_encoding)
+                                if result[0]==True:
+                                    messages.info(request,"this photo is already taken by  "+str(known_face_names[known_face_encodings.index(j)])+"kindly pleasse check and register again")
+
+                                    return redirect("/adminlogin/admin/addstudent")
+
                             password1=self.GENERATEPASSWORD()
                             
                             subject = 'Do not reply'
@@ -877,6 +925,42 @@ class ADMIN(models.Model):
                 if len(request.POST.getlist('allcourses'))>0:
                     if not User.objects.filter(username=username).exists():
                         if not User.objects.filter(email=email).exists():
+                            unknown_image=face_recognition.load_image_file(request.FILES['profprofilepic'])
+                            unknown_face_encoding = face_recognition.face_encodings(unknown_image)
+                            if len(unknown_face_encoding) <=0 :
+           
+                                messages.info(request,"No face found,please fill again")
+                                return redirect("/adminlogin/admin/addprofessor")
+                            
+                            unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
+                            base_dir = os.path.dirname(os.path.abspath(__file__))
+      
+                            base_dir = os.getcwd()
+                            image_dir = os.path.join(base_dir,"{}\{}".format('media','Faculty_Images'))
+                            
+       
+       
+        
+                            known_face_names = []
+                            known_face_encodings=[]
+                            for root,dirs,files in os.walk(image_dir):
+                                for file in files:
+                                    if file.endswith('jpg') or file.endswith('png') or file.endswith('jpeg') :
+                                        path = os.path.join(root, file)
+                                        img = face_recognition.load_image_file(path)
+                                        if file.endswith('jpeg'):
+                                            label = file[:len(file)-5]
+                                        else:
+                                            label = file[:len(file)-4]
+                                        img_encoding = face_recognition.face_encodings(img)[0]
+                                        known_face_names.append(label)
+                                        known_face_encodings.append(img_encoding)
+                            for j in known_face_encodings:
+                                result = face_recognition.compare_faces([j], unknown_face_encoding)
+                                if result[0]==True:
+                                    messages.info(request,"this photo is already taken by  "+str(known_face_names[known_face_encodings.index(j)])+"kindly pleasse check and register again")
+
+                                    return redirect("/adminlogin/admin/addprofessor")
                             
                             password1=self.GENERATEPASSWORD()
                             
@@ -912,7 +996,7 @@ class ADMIN(models.Model):
                                     continue
                         else:
                             messages.info(request,"email taken,please register again")
-                            return redirect('/adminlogin/admin/professor')
+                            return redirect('/adminlogin/admin/addprofessor')
 
                     else:
                         messages.info(request,"username Taken,please register again")
