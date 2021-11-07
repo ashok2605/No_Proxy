@@ -93,6 +93,8 @@ def stoptakingattendance(request):
         if request.method=="POST":
                 a=Professor.objects.get(id=request.user.professor.id) 
                 x=a.course_set.filter(attendance_taking_status=True).first()
+                name=x.course_name
+                print(name)
                 li=x.attendance_set.filter(attended_status=False)
                 liofstuabs=[]
 
@@ -127,8 +129,8 @@ def stoptakingattendance(request):
                 for k in a.course_set.filter(attendance_taking_status=True):
                         k.attendance_taking_status=False
                         k.save()
-                
-                return render(request,"showlist.html",{'li':liofstuabs})
+                print(name)
+                return render(request,"showlist.html",{'li':liofstuabs,'name':name})
 def studentattendance(request):
         if request.method=="GET":
                 a=Professor.objects.get(id=request.user.professor.id)

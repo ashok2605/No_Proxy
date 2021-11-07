@@ -384,6 +384,7 @@
         
 
         <label>Courses Taken:</label><br>
+        <!--
         {% if "CSN221" in l %}
         <input type="checkbox" name="allcourses" value="CSN221" checked/> CSN221<br />
         {% else %}
@@ -409,7 +410,16 @@
         {% else %}
         <input type="checkbox" name="allcourses" value="CEN105" /> CEN105<br />
         {% endif %}
-       
+        -->
+        {% for k in li %}
+
+        {% if k in l %}
+        <input type="checkbox" name="allcourses" value="{{k}}" checked/> {{k}}<br />
+        {% else %}
+        <input type="checkbox" name="allcourses" value="{{k}}" /> {{k}}<br />
+        {% endif %}
+
+        {% endfor %}
   <label>Professorid:</label><input type="text" name="professorid" placeholder="STUDENTID" required value="{{k.username}}">
 <br><br>
 <input type="submit" value="UPDATE">

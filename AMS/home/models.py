@@ -100,7 +100,7 @@ class Professor(models.Model):
         email_from = settings.EMAIL_HOST_USER
         send_mail(subject,message, email_from, recipient_list )
         messages.info(request,"warning sent successfully")
-        return redirect("/stafflogin/staff/studentattendance/PHN005")
+        return redirect("/stafflogin/staff/studentattendance/"+coursename+'/'+name)
            
                             
 
@@ -115,6 +115,7 @@ class Professor(models.Model):
             for k in q:
                 li.append(k.course_name)
             li=list(set(li))
+            print(s.spamprofilepic.url)
             return render(request,"staffprofile.html",{'s':s,'li':li})
         if request.method=="POST":
             a=request.user.email
@@ -456,7 +457,7 @@ class Student(models.Model):
     def VIEWSTUDENTPROFILE(self,request):
         if request.method=="GET":
             s=Student.objects.get(id=request.user.student.id)
-         
+            print(s.spamprofilepic.url)
             return render(request,"studentprofile.html",{'s':s})
         if request.method=="POST":
             a=request.user.email
@@ -909,8 +910,12 @@ class ADMIN(models.Model):
 
         def ADDPROFESSOR(self,request):
             if request.method=='GET':
-               
-                return render(request,'addprofessor.html')
+                l=[]
+                q=Course.objects.all()
+                for j in q:
+                    l.append(j.course_name)
+                l=list(set(l))
+                return render(request,'addprofessor.html',{'l':l})
             if request.method=="POST":
                 first_name=request.POST["firstname"]
                 last_name=request.POST["lastname"]
@@ -983,6 +988,7 @@ class ADMIN(models.Model):
                             print(q)
                             for obj in q:
                                 if Course.objects.filter(course_name=obj).exists():
+                                  
                                     if Course.objects.filter(course_name=obj).first().professor is None:
                                         x=Course.objects.filter(course_name=obj)
                                         print(x)
@@ -1213,8 +1219,12 @@ class ADMIN(models.Model):
                 for i in q:
                     l.append(i.course_name)
                 l=list(set(l))
-                
-                return render(request,"updateprofessorinfo.html",{'k':k,'l':l})
+                li=[]
+                p=Course.objects.all()
+                for j in p:
+                    li.append(j.course_name)
+                li=list(set(li))
+                return render(request,"updateprofessorinfo.html",{'k':k,'l':l,'li':li})
             if request.method=="POST":
                 a=User.objects.get(username=name).username
                 b=User.objects.get(username=name).email

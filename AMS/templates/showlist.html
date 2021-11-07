@@ -3,7 +3,7 @@
 <br><br>
 <b>ABSENT STUDENTS</b>:
 {% for k in li %}
-👉{{k.user.first_name}} {{k.user.last_name}} , {{k.user.username}} ,{{k.branch}}, {{k.semester}}
+<a href="/stafflogin/staff/studentattendance/{{name}}/{{k.user.username}}">👉{{k.user.first_name}} {{k.user.last_name}} , {{k.user.username}} ,{{k.branch}}, {{k.semester}}</a>
 
 {% endfor %}
 <br><br>
