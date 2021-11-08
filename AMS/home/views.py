@@ -12,7 +12,8 @@ import datetime
 # Create your views here.
 
 def homepage(request):
-    
+   
+
     if(request.method=='GET'):
         if ADMIN.objects.all().count()==User.objects.filter(is_staff=True,is_superuser=True).count():
             print("hello")

@@ -24,6 +24,7 @@ def deletenotice(request):
     a=ADMIN.objects.get(id=request.user.admin.id)
     return a.DELETENOTICE(request)
 def addstudent(request):
+ 
     a=ADMIN.objects.get(id=request.user.admin.id)
     return a.ADDSTUDENT(request)
 def addcourse(request):

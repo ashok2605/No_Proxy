@@ -120,6 +120,31 @@
 .sidebar.open li .tooltip{
   display: none;
 }
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button2 {
+  background-color: lightgray; 
+  color: black; 
+  border: 2px solid #008CBA;
+  border-radius: 8px;
+}
+
+.button2:hover {
+  background-color: #008CBA;
+  color: white;
+}
 .sidebar input{
   font-size: 15px;
   color: #FFF;
@@ -418,7 +443,7 @@
     </ul>
   </div>
   <section class="home-section">
-      <div class="text">Attendance Management System</div>
+     
 
       {% block content %}
       {% endblock %}

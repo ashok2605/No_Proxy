@@ -100,6 +100,7 @@ shbdvhbhj
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>	
 </body>
 </html>-->
+<!--
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -150,7 +151,7 @@ font-size:2rem;
 </style>
 <body>
 
-<!-- Navbar -->
+
 <div class="w3-top">
   <div class="w3-bar w3-black w3-card">
     <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
@@ -219,6 +220,55 @@ window.onclick = function(event) {
   }
 }
 </script>
+<script>
+  {% for message in messages %}
+  window.alert("{{message}}");
+  {% endfor %}
+</script>
+</body>
+</html>-->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<title>SAMS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+body {font-family: "Lato", sans-serif}
+.mySlides {display: none}
+</style>
+<body background="{% static 'home.jpeg' %}" style=" background-position: center; background-repeat: no-repeat; background-size: cover; height: 100%;">
+<div class="w3-left">
+  <div class="w3-bar w3-black w3-card">
+    <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="/" class="w3-bar-item w3-button w3-padding-large w3-hover-grey w3-black">HOME</a>
+    <!--<a style="text-align: center;" href="/" class="topnav-icons fa fa-home w3-bar-item w3-button w3-padding-large " title="Home"> HOME
+    </a>-->
+    <a href="/notices"class="w3-bar-item w3-button w3-padding-large w3-hide-small w3-hover-black">NOTICES</a>
+    <div class="w3-dropdown-hover w3-hide-small">
+      <button class="w3-padding-large w3-hover-grey w3-button" title="More">LOGIN<i class="fa fa-caret-down"></i></button>     
+      <div class="w3-dropdown-content w3-bar-block w3-card-4">
+        <a href="/studentlogin" class="w3-bar-item w3-button">STUDENT</a>
+        <a href="/stafflogin" class="w3-bar-item w3-button">STAFF</a>
+        <a href="/adminlogin" class="w3-bar-item w3-button">ADMIN</a>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br><br><br>
+<h1 style="color:black; text-align: center;">Hi Everyone,</h1>
+<p style="color:black;font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; text-align: center;font-size: medium;"> This is a ATTENDANCE MANAGEMENT SYSTEM <br>which Tracks attendance of Students  shows notices.<br>
+Please feel free to <a style="color:blue;" href="/contact">Contact Us</a> if u see any disturbances in website.</p>
+<br><br><br><br><br><br><br>
+<br>
+<br>
+</div>
 <script>
   {% for message in messages %}
   window.alert("{{message}}");

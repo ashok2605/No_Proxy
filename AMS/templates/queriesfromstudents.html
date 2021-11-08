@@ -282,7 +282,6 @@
         <i class='bx bx-menu' id="btn" ></i>
     </div>
     <ul class="nav-list">
-      
       <li>
         <a href="/adminlogin/admin/addnotice">
           <i class='bx bx-grid-alt'></i>
@@ -292,17 +291,45 @@
       </li>
       <li>
        <a href="/adminlogin/admin/deletenotice">
-         <i class='bx bx-user' ></i>
+        <i class='bx bx-grid-alt'></i>
          <span class="links_name">DELETE NOTICES</span>
        </a>
        <span class="tooltip">DELETE NOTICES</span>
      </li>
      <li>
+      <a href="/adminlogin/admin/addcourse">
+        <i class='bx bx-pie-chart-alt-2' ></i>
+        <span class="links_name">SCHEDULE COURSE</span>
+      </a>
+      <span class="tooltip">SCHEDULE COURSE</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/reschedulecourse">
+        <i class='bx bx-pie-chart-alt-2' ></i>
+        <span class="links_name">RESCHEDULE COURSE</span>
+      </a>
+      <span class="tooltip">RESCHEDULE COURSE</span>
+    </li>
+      <li>
+        <a href="/adminlogin/admin/addstudent">
+          <i class='bx bx-user' ></i>
+          <span class="links_name">ADDSTUDENT</span>
+        </a>
+        <span class="tooltip">ADDSTUDENT</span>
+      </li>
+      <li>
       <a href="/adminlogin/admin/removestudent">
         <i class='bx bx-user' ></i>
         <span class="links_name">REMOVE STUDENT</span>
       </a>
       <span class="tooltip">REMOVE STUDENT</span>
+    </li>
+    <li>
+      <a href="/adminlogin/admin/addprofessor">
+        <i class='bx bx-user' ></i>
+        <span class="links_name">ADDPROFESSOR</span>
+      </a>
+      <span class="tooltip">ADDPROFESSOR</span>
     </li>
     <li>
       <a href="/adminlogin/admin/removeprofessor">
@@ -311,27 +338,9 @@
       </a>
       <span class="tooltip">REMOVE PROFESSOR</span>
     </li>
-     <li>
-       <a href="/adminlogin/admin/addcourse">
-         <i class='bx bx-chat' ></i>
-         <span class="links_name">ADDCOURSE</span>
-       </a>
-       <span class="tooltip">ADDCOURSE</span>
-     </li>
-     <li>
-       <a href="/adminlogin/admin/addstudent">
-         <i class='bx bx-pie-chart-alt-2' ></i>
-         <span class="links_name">ADDSTUDENT</span>
-       </a>
-       <span class="tooltip">ADDSTUDENT</span>
-     </li>
-     <li>
-       <a href="/adminlogin/admin/addprofessor">
-         <i class='bx bx-folder' ></i>
-         <span class="links_name">ADDPROFESSOR</span>
-       </a>
-       <span class="tooltip">ADDPROFESSOR</span>
-     </li>
+     
+     
+     
      <li>
       <a href="/adminlogin/admin/initialupdatestudentinfo">
         <i class='bx bx-user' ></i>
@@ -346,16 +355,10 @@
       </a>
       <span class="tooltip">UPDATE PROFESSORINFO</span>
     </li>
-    <li>
-      <a href="/adminlogin/admin/reschedulecourse">
-        <i class='bx bx-user' ></i>
-        <span class="links_name">RESCHEDULE COURSE</span>
-      </a>
-      <span class="tooltip">RESCHEDULE COURSE</span>
-    </li>
+    
     <li>
       <a href="/adminlogin/admin/managequeries">
-        <i class='bx bx-user' ></i>
+        <i class='bx bx-chat' ></i>
         <span class="links_name">MANAGE QUERIES</span>
       </a>
       <span class="tooltip">MANAGE QUERIES</span>
@@ -380,10 +383,10 @@
     </ul>
   </div>
   <section class="home-section">
-      <div class="text">Attendance Management System</div>
+      <div class="text"><u><b>QUERIES FROM STUDENTS</b></u></div>
       <br><br>
    {% for i in q %}
-    From [{{i.from_stu.user.username }},{{i.from_stu.semester}} SEMESTER,{{i.from_stu.branch}}]👉<a href="/adminlogin/admin/queriesfromstudents/{{i.id}}">{{i.question}}</a><br>
+     From [{{i.from_stu.user.username }},{{i.from_stu.semester}} SEMESTER,{{i.from_stu.branch}}]👉<a href="/adminlogin/admin/queriesfromstudents/{{i.id}}">{{i.question}}</a><br>
 
 
    {% endfor %}

@@ -46,48 +46,8 @@ def responsestudentcourse(request,id):
         a=Professor.objects.get(id=request.user.professor.id)
         return a.RESPONSESTUDENTCOURSE(request,id)
 def takeattendance(request):
-        if request.method=="GET":
-                a=Professor.objects.get(id=request.user.professor.id)
-                q=a.course_set.all()
-                li=[]
-                for j in q:
-                        li.append(j.course_name)
-                li=list(set(li))
-                b=False
-                x=None
-                if a.course_set.filter(attendance_taking_status=True).exists():
-                        x=a.course_set.filter(attendance_taking_status=True).first().course_name
-                        #t=a.course_set.filter(attendance_taking_status=True).first().attendance_set.all()
-                        #for j in t:
-                        #       j.total_classes_count=j.total_classes_count+1
-                        #       j.save()
-                        b=True
-        
-                return render(request,'takeattendance.html',{'li':li,'x':x,'b':b})
-        if request.method=="POST":
-                print(request.POST['course'])
-                q=Course.objects.filter(course_name=request.POST['course'])
-                print(q)
-                for j in q:
-                        j.attendance_taking_status=True
-                        j.save()
-                k=Course.objects.filter(course_name=request.POST['course']).first().attendance_set.all()
-                for m in k:
-                        m.total_classes_count=m.total_classes_count+1
-                        code=GENERATEPASSWORD()
-                        m.code=code
-                        m.save()
-                            
-                        #subject = 'Do not reply'
-                            
-                          
-                        #message = 'Hi '+m.stud.user.username+"   YOUR CODE FOR TAKING ATTENDACE FOR COURSE" +request.POST['course']+ "IS    "+code
-                        #recipient_list = [m.stud.user.email]
-                        #email_from = settings.EMAIL_HOST_USER
-                        #send_mail(subject,message, email_from, recipient_list )
-
-                
-                return HttpResponse("taking attendance")
+        a=Professor.objects.get(id=request.user.professor.id)
+        return a.TAKEATTENDANCE(request)
 
 def stoptakingattendance(request):
         if request.method=="POST":
@@ -145,23 +105,8 @@ def staffstudentstats(request,coursename):
         a=Professor.objects.get(id=request.user.professor.id)
         return a.VIEWSTUDENTSTATS(request,coursename)
 def staffspecificstudentstats(request,coursename,name):
-        q=Course.objects.filter(course_name=coursename).first().attendance_set.all()
-        classesattended=0
-        totalclasses=0
-        for a in q:
-            classesattended=classesattended+a.attended_classes_count
-            totalclasses=totalclasses+a.total_classes_count
-        totalclassaverage=int((classesattended/totalclasses)*100)
-        obj=None
-        for k in q:
-            if k.stud.user.username==name:
-                obj=k
-                break
-        percentage=int((obj.attended_classes_count/obj.total_classes_count)*100)
-        li=obj.absentdates.all()
-        print(li)
-        student=User.objects.get(username=name).student
-        return render(request,"specificstudentstaff.html",{'obj':obj,'percentage':percentage,'li':li,'coursename':coursename,'student':student,'classavg':totalclassaverage})
+        a=Professor.objects.get(id=request.user.professor.id)
+        return a.VIEWSPECIFICSTUDENTSTATS(request,coursename,name)
 def sendwarning(request,coursename,name):
         a=Professor.objects.get(id=request.user.professor.id)
         return a.SENDWARNING(request,coursename,name)

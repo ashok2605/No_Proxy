@@ -1,6 +1,7 @@
 {% extends 'staffproj.html' %}
 
 {% block content %}
+<div class="text"><h1><b>      <u>Query Response:</u></b></h1></div>
 {% for i in q %}<br><br>
 QUERY👉 : {{i.question}}<br>
 {% if i.answered_status %}

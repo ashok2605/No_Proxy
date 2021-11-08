@@ -289,6 +289,31 @@
     padding: 0;
     margin: 0;
   }
+  .button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+  }
+  
+  .button2 {
+    background-color: lightgray; 
+    color: black; 
+    border: 2px solid #008CBA;
+    border-radius: 8px;
+  }
+  
+  .button2:hover {
+    background-color: #008CBA;
+    color: white;
+  }
   
   #myUL li a {
     border: 1px solid #ddd; /* Add a border to all links */
@@ -400,7 +425,7 @@
     </ul>
   </div>
   <section class="home-section">
-      <div class="text">Attendance Management System</div>
+   
 
       {% block content %}
       {% endblock %}

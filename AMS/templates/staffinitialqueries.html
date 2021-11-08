@@ -2,17 +2,19 @@
 {% block content %}
 <br><br>
 
-<a href="/stafflogin/staff/staffmakeaquery"><button type="button">Make a Query</button></a><br><br>
+<h1><b><pre>     <u>QUERY</u></pre></b></h1><br><br>
+<center>
+<a href="/stafflogin/staff/staffmakeaquery"><button type="button" class="button button2">Make a Query</button></a><br><br>
 <form method="POST" >
     {% csrf_token %}
     
-    <input type="submit" value="CheckQueryresponsesfrom">
+    <button type="submit" class="button button2">CHECK QUERYRESPONSES FROM</button>
     <select name="to_who" id="cars">
         <option value="ADMIN">ADMIN</option>
         
     </select>
     <br><br>
-
-
+</form>
+</center>
 
 {% endblock %}

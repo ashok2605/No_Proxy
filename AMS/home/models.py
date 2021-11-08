@@ -5,6 +5,7 @@ from django.db.models.deletion import SET_NULL
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import JsonResponse,HttpResponse
 import face_recognition
 import random
 import os
@@ -22,6 +23,7 @@ from django.http.response import HttpResponse
 from django.shortcuts import render,redirect
 # Create your models here.
 # Create your models here. 
+
 def faculty_directory_path(instance, filename): 
     name, ext = filename.split(".")
     name = instance.user.username
@@ -303,7 +305,75 @@ class Professor(models.Model):
 
         
         return render(request,"studentstaffstats.html",{'li':li,'att':att,'classavg':totalclassaverage,'coursename':coursename})
+    def VIEWSPECIFICSTUDENTSTATS(self,request,coursename,name):
+        q=Course.objects.filter(course_name=coursename).first().attendance_set.all()
+        classesattended=0
+        totalclasses=0
+        for a in q:
+            classesattended=classesattended+a.attended_classes_count
+            totalclasses=totalclasses+a.total_classes_count
+        totalclassaverage=int((classesattended/totalclasses)*100)
+        obj=None
+        for k in q:
+            if k.stud.user.username==name:
+                obj=k
+                break
+        percentage=int((obj.attended_classes_count/obj.total_classes_count)*100)
+        li=obj.absentdates.all()
+        print(li)
+        student=User.objects.get(username=name).student
+        return render(request,"specificstudentstaff.html",{'obj':obj,'percentage':percentage,'li':li,'coursename':coursename,'student':student,'classavg':totalclassaverage})
+    def GENERATEPASSWORD(self):
+            s="0123456789"
+            b=""
+            for i in range(8):
+                b=b+s[int(random.random()*10)]
+            print(b)
+            return b
+    def TAKEATTENDANCE(self,request):
+        if request.method=="GET":
+                a=Professor.objects.get(id=request.user.professor.id)
+                q=a.course_set.all()
+                li=[]
+                for j in q:
+                        li.append(j.course_name)
+                li=list(set(li))
+                b=False
+                x=None
+                if a.course_set.filter(attendance_taking_status=True).exists():
+                        x=a.course_set.filter(attendance_taking_status=True).first().course_name
+                        #t=a.course_set.filter(attendance_taking_status=True).first().attendance_set.all()
+                        #for j in t:
+                        #       j.total_classes_count=j.total_classes_count+1
+                        #       j.save()
+                        b=True
         
+                return render(request,'takeattendance.html',{'li':li,'x':x,'b':b})
+        if request.method=="POST":
+                a=Professor.objects.get(id=request.user.professor.id)
+                print(request.POST['course'])
+                q=Course.objects.filter(course_name=request.POST['course'])
+                print(q)
+                for j in q:
+                        j.attendance_taking_status=True
+                        j.save()
+                k=Course.objects.filter(course_name=request.POST['course']).first().attendance_set.all()
+                for m in k:
+                        m.total_classes_count=m.total_classes_count+1
+                        code=a.GENERATEPASSWORD()
+                        m.code=code
+                        m.save()
+                            
+                        #subject = 'Do not reply'
+                            
+                          
+                        #message = 'Hi '+m.stud.user.username+"   YOUR CODE FOR TAKING ATTENDACE FOR COURSE" +request.POST['course']+ "IS    "+code
+                        #recipient_list = [m.stud.user.email]
+                        #email_from = settings.EMAIL_HOST_USER
+                        #send_mail(subject,message, email_from, recipient_list )
+
+                
+                return HttpResponse("taking attendance")
 
                 
          
@@ -411,48 +481,7 @@ class Student(models.Model):
     studprofilepic=models.FileField(upload_to=student_directory_path,null=True,blank=True)
     
     
-    def find(self,request,image):
-       
-
-        unknown_image=face_recognition.load_image_file(image)
-        unknown_face_encoding = face_recognition.face_encodings(unknown_image)
-        if len(unknown_face_encoding) > 0:
-                    unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
-
-        else:
-                   print("No faces found in the image!")
-                
-                   return "USERNOTFOUND"
-        
-        known_face_encodings = []
-        
-
-        
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        # os.chdir("..")
-        base_dir = os.getcwd()
-        image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','Student_Images',request.user.student.semester,request.user.student.branch))
-        # print(image_dir)
-        
-        known_face_names = []
-     
-
-        for root,dirs,files in os.walk(image_dir):
-                for file in files:
-                        if file.endswith('jpg') or file.endswith('png') or file.endswith('jpeg'):
-                                path = os.path.join(root, file)
-                                img = face_recognition.load_image_file(path)
-                                label = file[:len(file)-4]
-                                img_encoding = face_recognition.face_encodings(img)[0]
-                                known_face_names.append(label)
-                                known_face_encodings.append(img_encoding)
-        for j in known_face_encodings:
-                result = face_recognition.compare_faces([j], unknown_face_encoding)
-                if result[0]==True:
-                        
-                        return "USERFOUND"
-  
-        return "USERNOTFOUND"
+   
 
     def VIEWSTUDENTPROFILE(self,request):
         if request.method=="GET":
@@ -627,7 +656,176 @@ class Student(models.Model):
         li=obj.absentdates.filter(attendanceid=obj.id)
         print(li)
         return render(request,"progressbar.html",{'obj':obj,'percentage':percentage,'li':li,'coursename':coursename,'student':request.user.student,'classavg':totalclassaverage})
-    
+    def find(self,details,request):
+        image_data=request.POST.get("content").split(",")[1]
+        print("hjsbdvhjsjdbvjsdbvjb")
+        name=request.user.username
+        with open(name+'.png','wb') as f:
+                f.write(base64.b64decode(image_data))
+        print(os.path.isfile(name+".png"))
+        unknown_image=face_recognition.load_image_file(name+'.png')
+        unknown_face_encoding = face_recognition.face_encodings(unknown_image)
+        if len(unknown_face_encoding) > 0:
+                    unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
+
+        else:
+                   print("No faces (or) Multiple faces found in the image!")
+                   os.remove(name+".png")
+                   return "USERNOTFOUND"
+        
+        known_face_encodings = []
+        
+
+        
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        # os.chdir("..")
+        base_dir = os.getcwd()
+        image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','Student_Images',details['semester'],details['branch']))
+        print(image_dir)
+       
+        # print(image_dir)
+        
+        known_face_names = []
+        p='Student_Images/{}/{}/{}'.format(request.user.student.semester,request.user.student.branch,request.user.username)
+        path=os.path.join(BASE_DIR,"media/"+p)
+        print(path)
+        print(request.user.username)
+        if os.path.isfile(path+'.png'):
+                img = face_recognition.load_image_file(path+'.png')
+                img_encoding = face_recognition.face_encodings(img)[0]
+                result = face_recognition.compare_faces([img_encoding], unknown_face_encoding)
+                if result[0]==True:
+                        os.remove(name+".png")
+                        return "USERFOUND"
+                else:
+                    os.remove(name+".png")
+                    return "USERNOTFOUND"
+        if os.path.isfile(path+'.jpeg'):
+                img = face_recognition.load_image_file(path+'.jpeg')
+                img_encoding = face_recognition.face_encodings(img)[0]
+                result = face_recognition.compare_faces([img_encoding], unknown_face_encoding)
+                if result[0]==True:
+                        os.remove(name+".png")
+                        return "USERFOUND"
+                else:
+                    os.remove(name+".png")
+                    return "USERNOTFOUND"
+        if os.path.isfile(path+'.jpg'):
+                img = face_recognition.load_image_file(path+'.jpg')
+                img_encoding = face_recognition.face_encodings(img)[0]
+                result = face_recognition.compare_faces([img_encoding], unknown_face_encoding)
+                if result[0]==True:
+                        os.remove(name+".png")
+                        return "USERFOUND"
+                else:
+                    os.remove(name+".png")
+                    return "USERNOTFOUND"
+        
+
+        for root,dirs,files in os.walk(image_dir):
+                for file in files:
+                        if file.endswith('jpg') or file.endswith('png'):
+                                path = os.path.join(root, file)
+                                img = face_recognition.load_image_file(path)
+                                label = file[:len(file)-4]
+                                img_encoding = face_recognition.face_encodings(img)[0]
+                                known_face_names.append(label)
+                                known_face_encodings.append(img_encoding)
+                        if file.endswith('jpeg'):
+                                path = os.path.join(root, file)
+                                img = face_recognition.load_image_file(path)
+                                label = file[:len(file)-5]
+                                img_encoding = face_recognition.face_encodings(img)[0]
+                                known_face_names.append(label)
+                                known_face_encodings.append(img_encoding)
+        for j in known_face_encodings:
+                result = face_recognition.compare_faces([j], unknown_face_encoding)
+                if result[0]==True:
+                        os.remove(name+".png")
+                        print(known_face_names[known_face_encodings.index(j)])
+                        print(request.user.username)
+
+                        if known_face_names[known_face_encodings.index(j)]==request.user.username:
+                                return "USERFOUND"
+                        else:
+                                return "USERNOTFOUND"
+        os.remove(name+".png")
+        return "USERNOTFOUND"
+    def MARKATTENDANCE(self,request):
+        if request.method=="GET":
+                a=Student.objects.get(id=request.user.student.id)
+                semester=a.semester
+                branch=a.branch
+                ob=None
+                obj=a.attendance_set.all()
+                for j in obj:
+                        if j.cour.filter(attendance_taking_status=True).exists():
+                                ob=j
+                                break
+                if Course.objects.filter(semester=semester,branch=branch,attendance_taking_status=True).exists() and ob.attended_status==False:
+                        name=Course.objects.filter(semester=semester,branch=branch,attendance_taking_status=True).first().course_name
+                        return render(request,'markattendance.html',{'name':name})
+                else:
+                        messages.info(request,"no subject is ongoing or ur attendance is noted")
+                        return redirect("/studentlogin/student")
+
+
+        if request.method=="POST":
+                if Course.objects.filter(semester=request.user.student.semester,branch=request.user.student.branch,attendance_taking_status=True).exists():
+                        a=Student.objects.get(id=request.user.student.id)
+                        ob=None
+                        obj=a.attendance_set.all()
+                        for j in obj:
+                                if j.cour.filter(attendance_taking_status=True).exists():
+                                        ob=j
+                                        break
+                        details = {
+                        'branch':request.user.student.branch,
+                        'semester': request.user.student.semester
+            
+                        }
+                #names = Recognizer(details)
+                #students=Student.objects.filter(semester=request.user.student.semester,branch=request.user.student.branch)
+                #flag=0
+                #for student in students:
+                        #if student.user.username==names:
+#                               # break
+                        s=a.find(details,request)
+                        print(s)
+                        if s=="USERFOUND":
+                                ob.attended_status=True
+                                ob.code=''
+                                ob.attended_classes_count=ob.attended_classes_count+1
+                                ob.save()
+                                return JsonResponse({'success':'FOUND'})
+                        else:
+                                return JsonResponse({'success':'NOTFOUND'})
+                else:
+                        messages.info(request,"sorry time is over,attendance not noted")
+                        return JsonResponse({'success':'timeover'})
+                
+                
+                
+                
+
+                #if ob.code==request.POST['code']:
+                       # ob.attended_status=True
+                       # ob.code=''
+                       # ob.attended_classes_count=ob.attended_classes_count+1
+                       # ob.save()
+                       # messages.info(request,"attendance noted")
+                       # return redirect("/studentlogin/student")
+                #if flag==1 :
+                        #ob.attended_status=True
+                        #ob.code=''
+                        #ob.attended_classes_count=ob.attended_classes_count+1
+                        #ob.save()
+                        #messages.info(request,"attendance noted")
+                        #return redirect("/studentlogin/student")
+                #else:
+                       # messages.info(request,"try again profile not found is wrong")
+                        #return redirect("/studentlogin/student/markattendance")
+               
 
 
 from adminfunctionalities.forms import *
@@ -649,7 +847,7 @@ class ADMIN(models.Model):
                 
                     f.save()
                 
-                
+                    messages.info(request,"notice added successfully")
                     return redirect("/adminlogin/admin/addnotice")
         def DELETENOTICE(self,request):
             if request.method=="GET":
@@ -660,6 +858,7 @@ class ADMIN(models.Model):
 
                 for i in querylist:
                     notices.objects.get(id=int(i)).delete()
+                messages.info(request,"notices deleted successfully")
                 return redirect("/adminlogin/admin/deletenotice")
        
         def GENERATEPASSWORD(self):
@@ -702,7 +901,7 @@ class ADMIN(models.Model):
                             unknown_face_encoding = face_recognition.face_encodings(unknown_image)
                             if len(unknown_face_encoding) <=0 :
            
-                                messages.info(request,"No face found,please fill again")
+                                messages.info(request,"No face (or) Multiple faces found,please fill again")
                                 return redirect("/adminlogin/admin/addstudent")
                             details={
                                 'semester':semester,
@@ -934,7 +1133,7 @@ class ADMIN(models.Model):
                             unknown_face_encoding = face_recognition.face_encodings(unknown_image)
                             if len(unknown_face_encoding) <=0 :
            
-                                messages.info(request,"No face found,please fill again")
+                                messages.info(request,"No face (ort) Multiple faces found,please fill again")
                                 return redirect("/adminlogin/admin/addprofessor")
                             
                             unknown_face_encoding = face_recognition.face_encodings(unknown_image)[0]
